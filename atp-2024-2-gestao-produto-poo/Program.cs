@@ -24,6 +24,7 @@
         static void Main(string[] args)
         {
             Estoque estoque = new Estoque(5);
+            estoque.LerArquivo();
 
             int op = 0;
 
@@ -45,6 +46,7 @@
                     case 5: estoque.Imprimir();
                         break;
                     case 0:
+                        estoque.GravarArquivo();
                         Console.WriteLine("Saindo...");
                         break;
                     default: Console.WriteLine("Opção Inválida!");
@@ -81,6 +83,16 @@
             Preco = double.Parse(Console.ReadLine());
             Console.Write("Digite o quantidade do produto: ");
             Qtd = int.Parse(Console.ReadLine());
+        }
+
+        public Produto Copia()
+        {
+            Produto p = new Produto();
+            p.Id = Id;
+            p.Nome = Nome;
+            p.Preco = Preco;
+            p.Qtd = Qtd;
+            return p;
         }
     }
 
@@ -177,14 +189,69 @@
             {
                 N--;
                 for (int i = pos; i < N; i++)
-                    produtos[i] = produtos[i + 1];
+                    produtos[i] = produtos[i + 1].Copia();
                 Console.WriteLine("\nProduto Removido com sucesso!!!");
             }
         }
 
         public void Buscar()
         {
+            Console.Write("\nDigite o codigo do produto: ");
+            int cod = int.Parse(Console.ReadLine());
+            int pos = BuscarPosicaoProdutoPorId(cod);
+            if (pos == -1)
+            {
+                Console.WriteLine("\nProduto não encontrado!\n");
+            }
+            else
+            {
+                produtos[pos].Imprimir();
+                Console.WriteLine("\nProduto Localizado com sucesso!!!");
+            }
+        }
 
+        public void GravarArquivo()
+        {
+            StreamWriter arquivo = new StreamWriter("Estoque.txt");
+
+            arquivo.WriteLine(N);
+            arquivo.WriteLine(SEQUENCIA);
+
+            for (int i = 0; i < N; i++)
+                arquivo.WriteLine($"{produtos[i].Id};{produtos[i].Nome};{produtos[i].Preco};{produtos[i].Qtd}");
+
+            arquivo.Close();
+        }
+
+        public void LerArquivo()
+        {
+            try
+            {
+
+                StreamReader arquivo = new StreamReader("Estoque.txt");
+
+                N = int.Parse(arquivo.ReadLine());
+                SEQUENCIA = int.Parse(arquivo.ReadLine());
+
+                for (int i = 0; i < N; i++)
+                {
+                    string linha = arquivo.ReadLine();
+                    string[] campos = linha.Split(";");
+                    produtos[i] = new Produto();
+                    produtos[i].Id = int.Parse(campos[0]);
+                    produtos[i].Nome = campos[1];
+                    produtos[i].Preco = double.Parse(campos[2]);
+                    produtos[i].Qtd = int.Parse(campos[3]);
+                }
+
+                arquivo.Close();
+
+            }
+            catch(Exception e) {
+            
+                Console.WriteLine("\n\nErro: " + e.ToString());
+                //Console.ReadKey();
+            }
         }
     }
 }
